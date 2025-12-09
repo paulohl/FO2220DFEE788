@@ -1,0 +1,1312 @@
+# -*- coding: utf-8 -*-
+"""
+🔥 PLAYWRIGHT UTILS - ULTRA ROBUSTO & ANTI-SPAM (V6 FINAL)
+==========================================================
+
+ESTRATEGIAS DE EVASIÓN ACTIVAS:
+1. ✅ VARIACIÓN DE ESPACIOS: 1 o 2 espacios aleatorios entre palabras (Invisible al ojo).
+2. ✅ INYECCIÓN FANTASMA: Caracteres Unicode 'zero-width' dentro de las palabras.
+3. ✅ JITTER DE PUNTUACIÓN: Modificación sutil de finales de frase.
+4. ✅ ANTI-HASH IMAGEN: Modificación de bits para romper el MD5 de Facebook.
+5. ✅ HUMAN TYPING: Prioridad a la escritura letra por letra.
+
+VERIFICADO: LÓGICA COMPLETA SIN ELIMINACIONES
+"""
+
+import json
+import random
+import time
+import os
+import subprocess
+import hashlib
+import re
+from datetime import datetime, timedelta
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
+from django.core.cache import cache
+from django.core.files.storage import default_storage
+import logging
+
+# 🔥 IMPORTANTE: Librería para manipulación de imágenes (Anti-Hash)
+try:
+    from PIL import Image, ImageEnhance
+except ImportError:
+    Image = None
+    print("⚠️ ADVERTENCIA: Pillow no está instalado. La función Anti-Hash de imagen se saltará.")
+    print("   Ejecuta: pip install Pillow")
+
+logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# XVFB
+# =============================================================================
+
+def detectar_xvfb():
+    """Detecta si Xvfb está disponible"""
+    try:
+        result = subprocess.run(['which', 'Xvfb'], capture_output=True)
+        disponible = result.returncode == 0
+        
+        if disponible:
+            logger.info("✅ Xvfb disponible - Usando headless=False")
+        else:
+            logger.warning("⚠️ Xvfb NO disponible - Usando headless=True")
+        
+        return disponible
+    except:
+        return False
+
+
+def iniciar_xvfb():
+    """Inicia Xvfb en display :99"""
+    try:
+        logger.info("🖥️ Iniciando Xvfb...")
+        
+        xvfb_process = subprocess.Popen(
+            ['Xvfb', ':99', '-screen', '0', '1920x1080x24'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        
+        os.environ['DISPLAY'] = ':99'
+        time.sleep(2)
+        
+        logger.info("✅ Xvfb iniciado en display :99")
+        return xvfb_process
+    except Exception as e:
+        logger.error(f"❌ Error iniciando Xvfb: {e}")
+        return None
+
+
+# =============================================================================
+# 🔥 NUEVAS FUNCIONES: LOGICA DE EVASIÓN (ANTI-SPAM)
+# =============================================================================
+
+def aplicar_variacion_natural_automatica(texto):
+    """
+    🔥 GENERADOR DE TEXTO POLIMÓRFICO
+    Crea una versión única del texto que se ve igual pero tiene un hash diferente
+    para los algoritmos de Facebook.
+    """
+    if not texto: return ""
+    
+    # ---------------------------------------------------------
+    # CAPA 1: VARIACIÓN DE ESPACIOS (Espacios dobles aleatorios)
+    # ---------------------------------------------------------
+    palabras = texto.split(' ')
+    texto_reconstruido = []
+    
+    for i, palabra in enumerate(palabras):
+        texto_reconstruido.append(palabra)
+        # Si no es la última palabra
+        if i < len(palabras) - 1:
+            # 30% de probabilidad de poner doble espacio (HTML lo renderiza como uno visualmente)
+            if random.random() < 0.3:
+                texto_reconstruido.append('  ') 
+            else:
+                texto_reconstruido.append(' ')
+    
+    texto_base = "".join(texto_reconstruido)
+    
+    # ---------------------------------------------------------
+    # CAPA 2: INYECCIÓN FANTASMA (Zero-Width Characters)
+    # ---------------------------------------------------------
+    # Estos caracteres no ocupan espacio en pantalla pero cambian el código binario
+    chars_invisibles = ['\u200B', '\u200C', '\u200D', '\u2060']
+    texto_lista = list(texto_base)
+    longitud = len(texto_lista)
+    
+    # Insertamos de 2 a 5 caracteres invisibles en posiciones aleatorias
+    if longitud > 5:
+        num_inserciones = random.randint(2, 5)
+        for _ in range(num_inserciones):
+            # Evitamos la primera y última posición para seguridad
+            pos = random.randint(1, longitud - 1)
+            char_inv = random.choice(chars_invisibles)
+            texto_lista.insert(pos, char_inv)
+            longitud += 1
+            
+    texto_modificado = "".join(texto_lista)
+
+    # ---------------------------------------------------------
+    # CAPA 3: JITTER DE PUNTUACIÓN (Imperfección Humana)
+    # ---------------------------------------------------------
+    if random.random() > 0.7: # 30% de probabilidad
+        if texto_modificado.endswith('.'):
+            # Quitar punto final (Hola. -> Hola)
+            texto_modificado = texto_modificado[:-1]
+        else:
+            # Agregar un espacio accidental al final (Hola -> Hola )
+            texto_modificado += " "
+            
+    return texto_modificado
+
+
+def modificar_imagen_antihash(ruta_imagen):
+    """
+    🔥 ANTI-HASH ULTRA AVANZADO - 8 TÉCNICAS
+    
+    1. ✅ Brillo imperceptible (±1-3%)
+    2. ✅ Contraste imperceptible (±1-2%)
+    3. ✅ Saturación imperceptible (±1-2%)
+    4. ✅ Recorte microscópico (1-2 pixels)
+    5. ✅ Modificación de píxeles aleatorios (3-5 píxeles)
+    6. ✅ Calidad JPEG variable (92-98)
+    7. ✅ Conversión RGB
+    8. ✅ Eliminación EXIF automática
+    """
+    if not Image:
+        logger.warning("⚠️ PIL no disponible, saltando anti-hash")
+        return ruta_imagen
+    
+    if not ruta_imagen or not os.path.exists(ruta_imagen):
+        logger.warning(f"⚠️ Imagen no encontrada: {ruta_imagen}")
+        return ruta_imagen
+    
+    try:
+        logger.info(f"🖼️ Procesando imagen con 8 técnicas anti-hash...")
+        
+        img = Image.open(ruta_imagen)
+        
+        # Convertir a RGB si es necesario
+        if img.mode in ("RGBA", "P", "LA", "L"):
+            if img.mode == "RGBA":
+                background = Image.new("RGB", img.size, (255, 255, 255))
+                background.paste(img, mask=img.split()[3])
+                img = background
+            else:
+                img = img.convert("RGB")
+        
+        # TÉCNICA 1: Brillo (±1-3%)
+        brillo_factor = random.uniform(0.97, 1.03)
+        enhancer_brillo = ImageEnhance.Brightness(img)
+        img = enhancer_brillo.enhance(brillo_factor)
+        
+        # TÉCNICA 2: Contraste (±1-2%)
+        contraste_factor = random.uniform(0.98, 1.02)
+        enhancer_contraste = ImageEnhance.Contrast(img)
+        img = enhancer_contraste.enhance(contraste_factor)
+        
+        # TÉCNICA 3: Saturación (±1-2%)
+        saturacion_factor = random.uniform(0.98, 1.02)
+        enhancer_saturacion = ImageEnhance.Color(img)
+        img = enhancer_saturacion.enhance(saturacion_factor)
+        
+        # TÉCNICA 4: Recorte microscópico (1-2 pixels)
+        width, height = img.size
+        if width > 100 and height > 100:
+            crop_pixels = random.randint(1, 2)
+            img = img.crop((crop_pixels, crop_pixels, width - crop_pixels, height - crop_pixels))
+        
+        # TÉCNICA 5: Modificación de píxeles aleatorios (3-5)
+        pixels = img.load()
+        width, height = img.size
+        num_pixels_modificar = random.randint(3, 5)
+        
+        for _ in range(num_pixels_modificar):
+            x = random.randint(0, width - 1)
+            y = random.randint(0, height - 1)
+            r, g, b = pixels[x, y]
+            nuevo_r = max(0, min(255, r + random.randint(-2, 2)))
+            nuevo_g = max(0, min(255, g + random.randint(-2, 2)))
+            nuevo_b = max(0, min(255, b + random.randint(-2, 2)))
+            pixels[x, y] = (nuevo_r, nuevo_g, nuevo_b)
+        
+        # TÉCNICA 6: Calidad JPEG variable (92-98)
+        quality_val = random.randint(92, 98)
+        
+        # TÉCNICA 7 y 8: Nombre único + Eliminación EXIF
+        timestamp = int(time.time())
+        random_suffix = random.randint(1000, 9999)
+        directorio = os.path.dirname(ruta_imagen)
+        nombre_archivo = f"temp_hash_{timestamp}_{random_suffix}.jpg"
+        ruta_temp = os.path.join(directorio, nombre_archivo)
+        
+        img.save(ruta_temp, "JPEG", quality=quality_val, optimize=True)
+        
+        logger.info(f"✅ Imagen procesada: 8 técnicas aplicadas → {nombre_archivo}")
+        return ruta_temp
+        
+    except Exception as e:
+        logger.error(f"❌ Error en anti-hash imagen: {e}")
+        return ruta_imagen
+
+
+# =============================================================================
+# 🔥 COMPORTAMIENTO HUMANO AVANZADO (5 FUNCIONES)
+# =============================================================================
+
+def simular_escritura_humana_con_errores(page, selector, texto):
+    """⌨️ SIMULACIÓN ULTRA REALISTA DE ESCRITURA HUMANA"""
+    try:
+        logger.info("⌨️ Escritura humana con errores...")
+        locator = page.locator(selector).first
+        locator.click()
+        time.sleep(random.uniform(0.5, 1.5))
+        page.keyboard.press('Control+A')
+        time.sleep(0.1)
+        page.keyboard.press('Delete')
+        time.sleep(random.uniform(0.3, 0.8))
+        
+        palabras = texto.split(' ')
+        teclas_cercanas = {
+            'a': ['s', 'q', 'w'], 'e': ['w', 'r', 'd'], 'i': ['u', 'o', 'k'],
+            'o': ['i', 'p', 'l'], 's': ['a', 'd', 'w'], 't': ['r', 'y', 'g']
+        }
+        
+        for i, palabra in enumerate(palabras):
+            cometer_error = random.random() < 0.10 and len(palabra) > 2
+            
+            if cometer_error:
+                pos_error = random.randint(1, len(palabra) - 2)
+                palabra_error = list(palabra)
+                letra = palabra_error[pos_error].lower()
+                if letra in teclas_cercanas:
+                    palabra_error[pos_error] = random.choice(teclas_cercanas[letra])
+                palabra_error_str = ''.join(palabra_error)
+                
+                for letra in palabra_error_str:
+                    page.keyboard.type(letra)
+                    time.sleep(random.uniform(0.05, 0.15))
+                time.sleep(random.uniform(0.5, 1.5))
+                
+                for _ in range(len(palabra_error_str)):
+                    page.keyboard.press('Backspace')
+                    time.sleep(random.uniform(0.03, 0.08))
+                time.sleep(random.uniform(0.2, 0.5))
+            
+            for j, letra in enumerate(palabra):
+                page.keyboard.type(letra)
+                delay = random.uniform(0.10, 0.20) if j < 2 else random.uniform(0.04, 0.10)
+                time.sleep(delay)
+            
+            if i < len(palabras) - 1:
+                page.keyboard.press('Space')
+                time.sleep(random.uniform(0.1, 0.3))
+                if random.random() < 0.05:
+                    time.sleep(random.uniform(1.0, 3.0))
+        
+        time.sleep(random.uniform(1.0, 2.5))
+        return True
+    except Exception as e:
+        logger.error(f"❌ Error escritura: {e}")
+        return False
+
+
+def mover_mouse_humanamente(page, x_destino, y_destino):
+    """🖱️ MOVIMIENTO CON CURVA DE BÉZIER"""
+    try:
+        x_actual, y_actual = 960, 540
+        p0_x, p0_y = x_actual, y_actual
+        p3_x, p3_y = x_destino, y_destino
+        distancia = ((p3_x - p0_x)**2 + (p3_y - p0_y)**2)**0.5
+        
+        p1_x = p0_x + (p3_x - p0_x) * 0.33 + random.randint(-50, 50)
+        p1_y = p0_y + (p3_y - p0_y) * 0.33 + random.randint(-50, 50)
+        p2_x = p0_x + (p3_x - p0_x) * 0.66 + random.randint(-50, 50)
+        p2_y = p0_y + (p3_y - p0_y) * 0.66 + random.randint(-50, 50)
+        
+        num_pasos = max(10, min(50, int(distancia / 10) + random.randint(5, 15)))
+        
+        for i in range(num_pasos + 1):
+            t = i / num_pasos
+            x = (1-t)**3 * p0_x + 3*(1-t)**2*t * p1_x + 3*(1-t)*t**2 * p2_x + t**3 * p3_x
+            y = (1-t)**3 * p0_y + 3*(1-t)**2*t * p1_y + 3*(1-t)*t**2 * p2_y + t**3 * p3_y
+            
+            if 0 < i < num_pasos:
+                x += random.uniform(-2, 2)
+                y += random.uniform(-2, 2)
+            
+            page.mouse.move(int(x), int(y))
+            progreso = i / num_pasos
+            delay = random.uniform(0.01, 0.03) if (progreso < 0.2 or progreso > 0.8) else random.uniform(0.005, 0.015)
+            time.sleep(delay)
+        
+        if random.random() < 0.10:
+            page.mouse.move(x_destino + random.randint(5, 15), y_destino + random.randint(5, 15))
+            time.sleep(random.uniform(0.05, 0.15))
+            page.mouse.move(x_destino, y_destino)
+        
+        return True
+    except Exception as e:
+        logger.error(f"❌ Error mouse: {e}")
+        page.mouse.move(x_destino, y_destino)
+        return False
+
+
+def scroll_como_humano(page, distancia_total=None):
+    """📜 SCROLL REALISTA"""
+    try:
+        if not distancia_total:
+            distancia_total = random.randint(300, 800)
+        
+        distancia_principal = int(distancia_total * 0.8)
+        distancia_recorrida = 0
+        
+        for i in range(random.randint(3, 7)):
+            segmento = distancia_principal - distancia_recorrida if i == 6 else random.randint(50, 150)
+            if segmento <= 0:
+                break
+            
+            progreso = distancia_recorrida / distancia_principal
+            velocidad = random.uniform(0.5, 1.0) if (progreso < 0.2 or progreso > 0.8) else random.uniform(1.0, 2.0)
+            
+            page.mouse.wheel(0, segmento)
+            distancia_recorrida += segmento
+            time.sleep(random.uniform(0.1, 0.3) / velocidad)
+        
+        if random.random() < 0.20:
+            scroll_atras = random.randint(50, 150)
+            page.mouse.wheel(0, -scroll_atras)
+            time.sleep(random.uniform(1.0, 2.5))
+            page.mouse.wheel(0, scroll_atras)
+        
+        return True
+    except Exception as e:
+        logger.error(f"❌ Error scroll: {e}")
+        return False
+
+
+def simular_lectura_post(page, post_element):
+    """📖 LECTURA SIMULADA"""
+    try:
+        try:
+            texto = post_element.inner_text()
+        except:
+            texto = "a " * 50
+        
+        num_palabras = len(texto.split())
+        wpm = random.uniform(150, 300)
+        tiempo = (num_palabras / wpm) * 60
+        tiempo += texto.count('.') * random.uniform(0.3, 0.8)
+        tiempo *= random.uniform(0.8, 1.2)
+        tiempo = max(1.0, min(10.0, tiempo))
+        
+        for i in range(random.randint(2, 4)):
+            time.sleep(tiempo / 4)
+            if i < 3 and random.random() < 0.5:
+                page.mouse.wheel(0, random.randint(20, 50))
+        
+        return True
+    except:
+        time.sleep(random.uniform(2.0, 4.0))
+        return False
+
+
+def interacciones_aleatorias_avanzadas(page):
+    """👆 INTERACCIONES ALEATORIAS REALISTAS"""
+    try:
+        logger.info("👆 Interacciones aleatorias...")
+        
+        try:
+            posts = page.locator('div[role="article"]').all()[:5]
+            if not posts:
+                return False
+        except:
+            return False
+        
+        stats = {'likes': 0, 'comentarios': 0, 'perfiles': 0}
+        
+        for i, post in enumerate(posts):
+            try:
+                post.scroll_into_view_if_needed()
+                time.sleep(random.uniform(0.5, 1.0))
+                simular_lectura_post(page, post)
+                
+                accion = random.random()
+                
+                if accion < 0.40:  # Like
+                    try:
+                        like_btn = post.locator('div[aria-label*="Me gusta"][role="button"]').first
+                        if like_btn.is_visible():
+                            bbox = like_btn.bounding_box()
+                            if bbox:
+                                mover_mouse_humanamente(page, bbox['x'] + bbox['width']/2, bbox['y'] + bbox['height']/2)
+                            like_btn.hover()
+                            time.sleep(random.uniform(0.2, 0.5))
+                            like_btn.click(delay=random.uniform(50, 150))
+                            stats['likes'] += 1
+                            time.sleep(random.uniform(0.5, 1.5))
+                    except:
+                        pass
+                
+                elif accion < 0.47:  # Comentar
+                    try:
+                        comment_btn = post.locator('div[aria-label*="Comentar"][role="button"]').first
+                        if comment_btn.is_visible():
+                            comment_btn.click()
+                            time.sleep(random.uniform(1.0, 2.0))
+                            page.keyboard.type(random.choice(["👍", "😊", "👏", "✨"]), delay=random.randint(50, 150))
+                            time.sleep(0.5)
+                            page.keyboard.press('Enter')
+                            stats['comentarios'] += 1
+                            time.sleep(random.uniform(1.0, 2.0))
+                    except:
+                        pass
+                
+                elif accion < 0.57:  # Ver perfil
+                    try:
+                        autor = post.locator('a[role="link"]').first
+                        if autor.is_visible():
+                            autor.click()
+                            time.sleep(random.uniform(2.0, 4.0))
+                            page.go_back()
+                            stats['perfiles'] += 1
+                            time.sleep(random.uniform(1.0, 2.0))
+                    except:
+                        pass
+                
+                if i < len(posts) - 1:
+                    scroll_como_humano(page, random.randint(150, 300))
+            except:
+                continue
+        
+        logger.info(f"✅ Interacciones: 👍{stats['likes']} 💬{stats['comentarios']} 👤{stats['perfiles']}")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Error interacciones: {e}")
+        return False
+
+
+# =============================================================================
+# SISTEMA DE INSERCIÓN ULTRA ROBUSTO - 4 MÉTODOS
+# =============================================================================
+
+def verificar_texto_insertado(page, selector, texto_esperado):
+    """
+    🔥 VERIFICACIÓN: Confirma que el texto realmente está en el campo.
+    NOTA: Limpiamos los caracteres invisibles antes de comparar para que la validación pase.
+    """
+    try:
+        contenido = page.evaluate(f"""
+            () => {{
+                const elem = document.querySelector('{selector}');
+                if (!elem) return '';
+                
+                // Intentar obtener el texto de diferentes formas
+                const contentEditable = elem.querySelector('[contenteditable="true"]') || 
+                                       elem.closest('[contenteditable="true"]') ||
+                                       elem;
+                
+                return contentEditable.textContent || contentEditable.innerText || elem.value || '';
+            }}
+        """)
+        
+        # Función para limpiar invisibles y normalizar espacios para la comparación lógica
+        def limpiar_para_validacion(t):
+            # Eliminar caracteres zero-width
+            t = re.sub(r'[\u200B\u200C\u200D\u2060]', '', t)
+            # Normalizar espacios dobles a simples para la comparación
+            t = re.sub(r'\s+', ' ', t)
+            return t.strip()
+        
+        contenido_limpio = limpiar_para_validacion(contenido)
+        esperado_limpio = limpiar_para_validacion(texto_esperado)
+        
+        # Comparar longitud (debe ser similar)
+        if len(contenido_limpio) >= len(esperado_limpio) * 0.8:  # Al menos 80% del texto
+            print(f"✅ Texto verificado: {len(contenido_limpio)} caracteres visibles")
+            return True
+        else:
+            print(f"⚠️ Texto incompleto: {len(contenido_limpio)}/{len(esperado_limpio)} caracteres")
+            return False
+            
+    except Exception as e:
+        print(f"⚠️ Error verificando texto: {e}")
+        return False
+
+
+def metodo_1_fill_con_eventos(page, selector, texto):
+    """
+    🔥 MÉTODO 1: fill() + Eventos React
+    """
+    try:
+        print("\n🎯 MÉTODO 1: fill() + Eventos React")
+        
+        locator = page.locator(selector).first
+        
+        # Click para dar focus
+        locator.click()
+        time.sleep(random.uniform(0.3, 0.6))
+        
+        # Limpiar campo
+        locator.fill('')
+        time.sleep(random.uniform(0.2, 0.4))
+        
+        # fill()
+        locator.fill(texto)
+        time.sleep(random.uniform(0.5, 1.0))
+        
+        # Disparar eventos adicionales
+        page.evaluate(f"""
+            () => {{
+                const elem = document.querySelector('{selector}');
+                if (elem) {{
+                    const contentEditable = elem.querySelector('[contenteditable="true"]') || 
+                                           elem.closest('[contenteditable="true"]') ||
+                                           elem;
+                    
+                    ['input', 'change', 'keyup'].forEach(eventName => {{
+                        const event = new Event(eventName, {{ bubbles: true, cancelable: true }});
+                        contentEditable.dispatchEvent(event);
+                    }});
+                    
+                    contentEditable.focus();
+                }}
+            }}
+        """)
+        
+        time.sleep(random.uniform(0.5, 1.0))
+        return verificar_texto_insertado(page, selector, texto)
+            
+    except Exception as e:
+        print(f"❌ MÉTODO 1 falló: {e}")
+        return False
+
+
+def metodo_2_clipboard_paste(page, selector, texto):
+    """
+    🔥 MÉTODO 2: Simular Ctrl+V (Paste)
+    """
+    try:
+        print("\n🎯 MÉTODO 2: Clipboard Paste (Ctrl+V)")
+        
+        locator = page.locator(selector).first
+        
+        # Click y limpiar
+        locator.click()
+        time.sleep(random.uniform(0.3, 0.6))
+        
+        page.keyboard.press('Control+A')
+        time.sleep(0.1)
+        page.keyboard.press('Delete')
+        time.sleep(random.uniform(0.3, 0.6))
+        
+        # Inyectar texto en clipboard y simular paste
+        page.evaluate(f"""
+            async () => {{
+                const texto = {json.dumps(texto)};
+                
+                // Copiar al clipboard (simulado)
+                // await navigator.clipboard.writeText(texto); // Opcional, a veces falla en headless
+                
+                const elem = document.querySelector('{selector}');
+                if (elem) {{
+                    const contentEditable = elem.querySelector('[contenteditable="true"]') || 
+                                           elem.closest('[contenteditable="true"]') ||
+                                           elem;
+                    
+                    // Insertar texto
+                    contentEditable.textContent = texto;
+                    
+                    // Disparar paste event
+                    const pasteEvent = new InputEvent('input', {{
+                        bubbles: true,
+                        inputType: 'insertFromPaste',
+                        data: texto
+                    }});
+                    
+                    contentEditable.dispatchEvent(pasteEvent);
+                    contentEditable.focus();
+                }}
+            }}
+        """)
+        
+        time.sleep(random.uniform(0.5, 1.0))
+        return verificar_texto_insertado(page, selector, texto)
+            
+    except Exception as e:
+        print(f"❌ MÉTODO 2 falló: {e}")
+        return False
+
+
+def metodo_3_type_con_eventos(page, selector, texto):
+    """
+    🔥 MÉTODO 3: type() línea por línea (HUMAN TYPING)
+    Este es el método preferido para evitar SPAM.
+    """
+    try:
+        print("\n🎯 MÉTODO 3: Human Type (Letra por letra)")
+        
+        locator = page.locator(selector).first
+        
+        # Click y limpiar
+        locator.click()
+        time.sleep(random.uniform(0.3, 0.6))
+        
+        page.keyboard.press('Control+A')
+        time.sleep(0.1)
+        page.keyboard.press('Delete')
+        time.sleep(random.uniform(0.3, 0.6))
+        
+        # Escribir carácter por carácter con delay variable
+        lineas = texto.split('\n')
+        
+        for i, linea in enumerate(lineas):
+            if linea:
+                # Delay aleatorio entre 10ms y 50ms por tecla
+                page.keyboard.type(linea, delay=random.randint(10, 50))
+            
+            # Salto de línea
+            if i < len(lineas) - 1:
+                page.keyboard.press('Shift+Enter')
+                time.sleep(random.uniform(0.1, 0.3))
+        
+        time.sleep(random.uniform(0.5, 1.0))
+        return verificar_texto_insertado(page, selector, texto)
+            
+    except Exception as e:
+        print(f"❌ MÉTODO 3 falló: {e}")
+        return False
+
+
+def metodo_4_javascript_directo(page, selector, texto):
+    """
+    🔥 MÉTODO 4: JavaScript directo con eventos completos
+    """
+    try:
+        print("\n🎯 MÉTODO 4: JavaScript directo")
+        
+        resultado = page.evaluate(f"""
+            () => {{
+                const selector = '{selector}';
+                const texto = {json.dumps(texto)};
+                
+                const elem = document.querySelector(selector);
+                if (!elem) return false;
+                
+                const contentEditable = elem.querySelector('[contenteditable="true"]') || 
+                                       elem.closest('[contenteditable="true"]') ||
+                                       elem;
+                
+                // Insertar texto con HTML para saltos de línea
+                contentEditable.innerHTML = texto.replace(/\\n/g, '<br>');
+                
+                // Disparar eventos
+                ['input', 'change', 'keydown', 'keyup', 'blur', 'focus'].forEach(eventName => {{
+                    const event = new Event(eventName, {{ bubbles: true, cancelable: true }});
+                    contentEditable.dispatchEvent(event);
+                }});
+                
+                contentEditable.focus();
+                return true;
+            }}
+        """)
+        
+        if resultado:
+            time.sleep(random.uniform(0.5, 1.0))
+            return verificar_texto_insertado(page, selector, texto)
+        else:
+            print("❌ MÉTODO 4: JavaScript retornó false")
+            return False
+            
+    except Exception as e:
+        print(f"❌ MÉTODO 4 falló: {e}")
+        return False
+
+
+def insertar_texto_ultra_robusto(page, selector, texto):
+    """
+    🔥 SISTEMA ULTRA ROBUSTO - PRIORIZANDO COMPORTAMIENTO HUMANO
+    """
+    print("\n" + "="*70)
+    print("🔥 INICIANDO INSERCIÓN DE TEXTO (MODO ANTI-BOT)")
+    print(f"📝 Texto original: {len(texto)} caracteres")
+    print("="*70)
+    
+    # Verificar que el elemento existe
+    try:
+        if page.locator(selector).count() == 0:
+            raise Exception(f"Elemento no encontrado: {selector}")
+    except Exception as e:
+        print(f"❌ CRÍTICO: {e}")
+        raise
+    
+    # 🔥 CAMBIO DE PRIORIDAD: Humano primero
+    # 1. Type (Más humano, evita filtros de spam)
+    # 2. Paste (Usuario pegando)
+    # 3. Fill (Nativo)
+    # 4. JS (Fuerza bruta)
+    metodos = [
+        ("MÉTODO 3 (Human Type)", metodo_3_type_con_eventos),
+        ("MÉTODO 2 (Clipboard Paste)", metodo_2_clipboard_paste),
+        ("MÉTODO 1 (Fill Nativo)", metodo_1_fill_con_eventos),
+        ("MÉTODO 4 (JavaScript)", metodo_4_javascript_directo)
+    ]
+    
+    for i, (nombre, metodo) in enumerate(metodos, 1):
+        print(f"\n🔄 Intentando {nombre} ({i}/4)")
+        
+        try:
+            if metodo(page, selector, texto):
+                print(f"✅ ÉXITO CON {nombre}")
+                return True
+            else:
+                print(f"⚠️ {nombre} no funcionó, probando siguiente...")
+                time.sleep(random.uniform(0.5, 1.0))
+                
+        except Exception as e:
+            print(f"❌ Excepción en {nombre}: {e}")
+            time.sleep(random.uniform(0.5, 1.0))
+    
+    raise Exception(f"FALLO TOTAL: No se pudo insertar texto con ninguno de los 4 métodos")
+
+
+# =============================================================================
+# CLASES Y UTILIDADES DE SOPORTE (MANTENIDAS)
+# =============================================================================
+
+class GestorAntiSuspension:
+    def __init__(self):
+        self.limites_diarios = {}
+        self.ultima_actividad = {}
+        self.historial_patrones = []
+    
+    def registrar_actividad(self, usuario_id, grupo_url):
+        ahora = datetime.now()
+        hoy = ahora.date()
+        key = f"{usuario_id}_{hoy}"
+        
+        self.limites_diarios[key] = self.limites_diarios.get(key, 0) + 1
+        self.ultima_actividad[usuario_id] = ahora
+        
+        self.historial_patrones.append({
+            'timestamp': time.time(),
+            'grupo': grupo_url,
+            'usuario': usuario_id
+        })
+        
+        if len(self.historial_patrones) > 20:
+            self.historial_patrones.pop(0)
+
+gestor_suspension = GestorAntiSuspension()
+
+def obtener_configuracion_stealth():
+    user_agents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+    ]
+    
+    viewports = [
+        {'width': 1920, 'height': 1080},
+        {'width': 1366, 'height': 768}
+    ]
+    
+    return {
+        'user_agent': random.choice(user_agents),
+        'viewport': random.choice(viewports),
+        'locale': 'es-ES',
+        'timezone': 'Europe/Madrid'
+    }
+
+def obtener_args_chromium_ultra_stealth():
+    return [
+        '--disable-blink-features=AutomationControlled',
+        '--disable-web-security',
+        '--disable-dev-shm-usage',
+        '--no-sandbox',
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-translate',
+        '--disable-sync',
+        '--memory-pressure-off',
+        '--disable-notifications',
+        '--start-maximized'
+    ]
+
+def cargar_cookies_desde_json(filename):
+    try:
+        with open(filename, 'r') as file:
+            cookies = json.load(file)
+        return cookies
+    except FileNotFoundError:
+        return []
+
+def esperar_tiempo_aleatorio(minimo, maximo):
+    time.sleep(random.uniform(minimo, maximo))
+
+def interactuar_con_grupo_pre_publicacion(page):
+    print("\n🤖 SIMULANDO USUARIO REAL\n")
+    
+    try:
+        print("📖 Leyendo publicaciones...")
+        num_scrolls = random.randint(3, 5)
+        
+        for i in range(num_scrolls):
+            page.mouse.wheel(0, random.randint(250, 400))
+            tiempo = random.uniform(2.0, 3.5)
+            print(f"  📄 Publicación {i+1}/{num_scrolls} ({tiempo:.1f}s)")
+            time.sleep(tiempo)
+        
+        print("✅ Interacciones completadas\n")
+        return True
+    except Exception as e:
+        print(f"⚠️ Error: {e}")
+        return False
+
+def verificar_inicio_sesion(page):
+    return "https://www.facebook.com/" in page.url and "login" not in page.url
+
+def hacer_clic_boton_login(page):
+    print("[LOGIN] Buscando botón...")
+    
+    selectores = [
+        'button[name="login"]',
+        'button[type="submit"]',
+        'button:has-text("Iniciar sesión")',
+        'button:has-text("Log In")'
+    ]
+    
+    for selector in selectores:
+        try:
+            elemento = page.locator(selector).first
+            if elemento.count() > 0:
+                elemento.wait_for(state='visible', timeout=5000)
+                time.sleep(random.uniform(0.5, 1.0))
+                elemento.click(timeout=5000)
+                print(f"[LOGIN] ✅ Click exitoso")
+                return True
+        except:
+            continue
+    
+    print("[LOGIN] ❌ No se pudo hacer click")
+    return False
+
+def generar_firma_invisible():
+    """
+    Genera firma invisible simple (se mantiene por compatibilidad, 
+    aunque aplicar_variacion_natural_automatica ya inyecta caracteres).
+    """
+    chars_invisibles = ['\u200B', '\u200C', '\u200D']
+    timestamp = str(int(time.time()))
+    firma_binaria = bin(int(timestamp))[2:]
+    
+    firma_invisible = ''.join(
+        chars_invisibles[int(bit)] if bit == '1' else chars_invisibles[0]
+        for bit in firma_binaria[:20]
+    )
+    
+    return firma_invisible
+
+
+# =============================================================================
+# FUNCIÓN PRINCIPAL
+# =============================================================================
+
+def iniciar_publicacion_en_grupo(announcement_id, usuario, contrasena, mensaje, grupo_url, imagen_ruta=None, grupo_urls=None, max_intentos=3):
+    """
+    🔥 FUNCIÓN PRINCIPAL - ULTRA ROBUSTA
+    """
+    
+    print("\n" + "🚀"*40)
+    print(f"🚀 NUEVA PUBLICACIÓN")
+    print(f"📋 Anuncio: {announcement_id}")
+    print(f"👤 Usuario: {usuario}")
+    print(f"🎯 Grupo: {grupo_url}")
+    print("🚀"*40 + "\n")
+    
+    if not grupo_url or not grupo_url.startswith('http'):
+        print("❌ URL inválida")
+        return False
+    
+    # ---------------------------------------------------------
+    # 🔥 PREPARACIÓN 1: IMAGEN ANTI-HASH
+    # ---------------------------------------------------------
+    ruta_imagen_final = None
+    
+    if imagen_ruta:
+        # Resolver ruta absoluta si es relativa
+        if not os.path.isabs(imagen_ruta) and not imagen_ruta.startswith('/'):
+             imagen_ruta = os.path.join(default_storage.location, imagen_ruta)
+    
+    if imagen_ruta and os.path.exists(imagen_ruta):
+        print(f"🖼️ Procesando imagen para Anti-Hash...")
+        ruta_imagen_final = modificar_imagen_antihash(imagen_ruta)
+    elif imagen_ruta:
+        print(f"⚠️ Imagen no encontrada en ruta: {imagen_ruta}")
+        imagen_ruta = None
+    
+    # ---------------------------------------------------------
+    # 🔥 PREPARACIÓN 2: TEXTO POLIMÓRFICO
+    # ---------------------------------------------------------
+    print(f"✍️ Generando variación natural del texto...")
+    mensaje_variado = aplicar_variacion_natural_automatica(mensaje)
+    firma_invisible = generar_firma_invisible()
+    texto_completo = f"{mensaje_variado} {firma_invisible}"
+    
+    print(f"📝 Texto final: {len(texto_completo)} caracteres (incluyendo invisibles)")
+    
+    # Cargar cookies
+    cache_key = f"facebook_user_cache_{usuario}"
+    cookies = cache.get(cache_key, cargar_cookies_desde_json(f'cookies_{usuario}.json'))
+    
+    # Crear directorio de capturas si no existe
+    os.makedirs('capturas', exist_ok=True)
+    
+    # Configuración
+    config = obtener_configuracion_stealth()
+    
+    # Xvfb
+    tiene_xvfb = detectar_xvfb()
+    xvfb_process = None
+    usar_headless = True
+    
+    if tiene_xvfb:
+        xvfb_process = iniciar_xvfb()
+        if xvfb_process:
+            usar_headless = False
+            print("✅ Xvfb activo - headless=False\n")
+    
+    intento_actual = 0
+    resultado_final = False
+    
+    try:
+        with sync_playwright() as p:
+            while intento_actual < max_intentos:
+                browser = context = page = None
+                
+                try:
+                    print(f"\n{'='*60}")
+                    print(f"🔄 INTENTO {intento_actual + 1} de {max_intentos}")
+                    print(f"{'='*60}\n")
+                    
+                    # Lanzar navegador
+                    print(f"🌐 Navegador (headless={usar_headless})...")
+                    browser = p.chromium.launch(
+                        headless=usar_headless,
+                        args=obtener_args_chromium_ultra_stealth()
+                    )
+                    
+                    # Contexto
+                    context = browser.new_context(
+                        viewport=config['viewport'],
+                        locale=config['locale'],
+                        timezone_id=config['timezone'],
+                        user_agent=config['user_agent']
+                    )
+                    
+                    # Anti-detección
+                    context.add_init_script("""
+                        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                        window.chrome = {runtime: {}, loadTimes: function() {}, csi: function() {}};
+                        console.log('🛡️ Anti-detección activo');
+                    """)
+                    
+                    # Cookies
+                    if cookies and all(isinstance(c, dict) and 'name' in c for c in cookies):
+                        try:
+                            context.add_cookies(cookies)
+                            print("✅ Cookies cargadas")
+                        except Exception as e:
+                            print(f"⚠️ Cookies warning: {e}")
+                    
+                    page = context.new_page()
+                    
+                    # LOGIN
+                    print("\n🔐 Login...")
+                    page.goto('https://www.facebook.com/login/', timeout=60000)
+                    page.wait_for_load_state('networkidle', timeout=30000)
+                    
+                    if not verificar_inicio_sesion(page):
+                        print("Login manual...")
+                        
+                        page.fill('input[name="email"]', usuario, timeout=15000)
+                        time.sleep(random.uniform(0.5, 1.0))
+                        
+                        page.fill('input[name="pass"]', contrasena, timeout=15000)
+                        time.sleep(random.uniform(0.5, 1.0))
+                        
+                        if not hacer_clic_boton_login(page):
+                            print("❌ Error en login")
+                            intento_actual += 1
+                            continue
+                        
+                        time.sleep(3)
+                        page.wait_for_load_state('networkidle', timeout=30000)
+                        
+                        if verificar_inicio_sesion(page):
+                            print("✅ Login exitoso, guardando cookies...")
+                            cookies = context.cookies()
+                            cache.set(cache_key, cookies, timeout=60 * 60 * 24)
+                            try:
+                                with open(f'cookies_{usuario}.json', 'w') as file:
+                                    json.dump(cookies, file)
+                            except:
+                                pass
+                        else:
+                            print("❌ Login fallido")
+                            intento_actual += 1
+                            continue
+                    
+                    # Navegar al grupo
+                    print(f"\n📍 Navegando al grupo...")
+                    page.goto(grupo_url, timeout=60000)
+                    page.wait_for_load_state('networkidle', timeout=30000)
+                    esperar_tiempo_aleatorio(2, 3)
+                    
+                    # 📸 CAPTURA PASO 1
+                    try: page.screenshot(path="capturas/paso1_grupo.png") 
+                    except: pass
+                    
+                    # Interacciones avanzadas
+                    interacciones_aleatorias_avanzadas(page)
+                    
+                    # Abrir cuadro
+                    print("\n📝 PASO 2: Abriendo cuadro...")
+                    
+                    cuadro_abierto = False
+                    selectores_iniciar = [
+                        'div[role="button"]:has-text("¿Qué estás pensando")',
+                        'div[role="button"]:has-text("Escribe algo")',
+                        'span:has-text("Escribe algo")'
+                    ]
+                    
+                    for selector in selectores_iniciar:
+                        try:
+                            if page.locator(selector).count() > 0:
+                                page.click(selector, timeout=8000)
+                                cuadro_abierto = True
+                                print(f"✅ Cuadro abierto")
+                                break
+                        except:
+                            continue
+                    
+                    if not cuadro_abierto:
+                        # Intento tecla 'p'
+                        page.keyboard.press('p')
+                        time.sleep(2)
+                        if page.locator('div[role="dialog"]').count() > 0:
+                            cuadro_abierto = True
+                            print(f"✅ Cuadro abierto (tecla P)")
+                        else:
+                            raise Exception("No se pudo abrir cuadro")
+                    
+                    esperar_tiempo_aleatorio(2, 3)
+                    # 📸 CAPTURA PASO 2
+                    try: page.screenshot(path="capturas/paso2_cuadro.png")
+                    except: pass
+                    
+                    # 🔥 INSERCIÓN ULTRA ROBUSTA
+                    print("\n✍️ PASO 3: Insertando texto (ultra robusto)...")
+                    
+                    selectores_texto = [
+                        'div[role="dialog"] div[contenteditable="true"]',
+                        'div[role="dialog"] div[aria-label*="públicas"]',
+                        'div[role="dialog"] p[data-placeholder]'
+                    ]
+                    
+                    texto_insertado = False
+                    for selector in selectores_texto:
+                        try:
+                            if page.locator(selector).count() > 0:
+                                print(f"\n🎯 Usando selector: {selector}")
+                                
+                                # 🔥 LLAMADA AL SISTEMA ULTRA ROBUSTO
+                                # Usamos el texto modificado aquí
+                                insertar_texto_ultra_robusto(page, selector, texto_completo)
+                                
+                                texto_insertado = True
+                                break
+                                
+                        except Exception as e:
+                            print(f"⚠️ Falló con selector {selector}: {e}")
+                            continue
+                    
+                    if not texto_insertado:
+                        raise Exception("No se pudo insertar texto con ningún selector")
+                    
+                    # 📸 CAPTURA PASO 3
+                    try: page.screenshot(path="capturas/paso3_texto.png")
+                    except: pass
+                    esperar_tiempo_aleatorio(2, 3)
+                    
+                    # Subir imagen
+                    if ruta_imagen_final:
+                        print(f"\n🖼️ PASO 4: Subiendo imagen única...")
+                        
+                        try:
+                            page.click('div[role="dialog"] div[aria-label="Foto/vídeo"]', timeout=10000)
+                        except:
+                            # A veces es un icono
+                            try:
+                                page.locator("div[aria-label='Foto/vídeo']").first.click()
+                            except:
+                                pass
+                        
+                        esperar_tiempo_aleatorio(2, 3)
+                        
+                        inputs = page.locator('div[role="dialog"] input[type="file"]')
+                        if inputs.count() > 0:
+                            inputs.first.set_input_files(ruta_imagen_final)
+                            print("✅ Imagen subida")
+                        else:
+                            raise Exception("No se pudo subir imagen (input no encontrado)")
+                        
+                        # 📸 CAPTURA PASO 4
+                        try: page.screenshot(path="capturas/paso4_imagen.png")
+                        except: pass
+                        esperar_tiempo_aleatorio(3, 5)
+                    
+                    # Publicar
+                    print("\n📤 PASO 5: Publicando...")
+                    
+                    # Esperar que el botón se habilite
+                    print("⏳ Esperando habilitación del botón...")
+                    esperar_tiempo_aleatorio(2, 4)
+                    
+                    publicado = False
+                    try:
+                        page.click('div[aria-label="Publicar"]:not([aria-disabled="true"])', timeout=15000)
+                        publicado = True
+                        print("✅ Click en Publicar")
+                    except:
+                        try:
+                            page.click('div[role="button"]:has-text("Publicar")', timeout=10000)
+                            publicado = True
+                            print("✅ Click en Publicar (alt)")
+                        except:
+                            pass
+                    
+                    if not publicado:
+                        raise Exception("No se pudo hacer click en 'Publicar'")
+                    
+                    esperar_tiempo_aleatorio(3, 5)
+                    # 📸 CAPTURA PASO 5
+                    try: page.screenshot(path="capturas/paso5_publicado.png")
+                    except: pass
+                    
+                    # Registrar
+                    usuario_hash = hashlib.md5(usuario.encode()).hexdigest()[:8]
+                    gestor_suspension.registrar_actividad(usuario_hash, grupo_url)
+                    
+                    print("\n" + "✅"*40)
+                    print("✅ PUBLICACIÓN COMPLETADA")
+                    print("✅"*40 + "\n")
+                    
+                    resultado_final = True
+                    break
+                
+                except Exception as e:
+                    print(f"\n❌ ERROR INTENTO {intento_actual + 1}: {e}")
+                    
+                    if page:
+                        try:
+                            page.screenshot(path=f"capturas/error_{intento_actual + 1}_{int(time.time())}.png")
+                        except:
+                            pass
+                    
+                    intento_actual += 1
+                    
+                    if intento_actual >= max_intentos:
+                        print(f"\n❌ MÁXIMO DE INTENTOS ({max_intentos})")
+                        break
+                    
+                    delay = random.uniform(5, 10)
+                    print(f"\n⏳ Reintentando en {delay:.1f}s...")
+                    time.sleep(delay)
+                
+                finally:
+                    try:
+                        if context:
+                            context.close()
+                    except:
+                        pass
+                    try:
+                        if browser:
+                            browser.close()
+                    except:
+                        pass
+    
+    finally:
+        # 🧹 LIMPIEZA DE ARCHIVOS TEMPORALES (CRÍTICO)
+        if ruta_imagen_final and ruta_imagen_final != imagen_ruta:
+            try:
+                if os.path.exists(ruta_imagen_final):
+                    os.remove(ruta_imagen_final)
+                    print("🧹 Imagen temporal eliminada correctamente")
+            except:
+                pass
+            
+        if xvfb_process:
+            try:
+                xvfb_process.terminate()
+                xvfb_process.wait(timeout=5)
+                print("✅ Xvfb cerrado")
+            except:
+                try:
+                    xvfb_process.kill()
+                except:
+                    pass
+    
+    return resultado_final
+
+
+# =============================================================================
+# WRAPPERS
+# =============================================================================
+
+def ejecutar_publicacion_facebook(announcement_id, usuario_id, grupo_url):
+    from publicadorFacebook.models import Anuncio, UsuarioFacebook
+
+    try:
+        anuncio = Anuncio.objects.get(id=announcement_id)
+        usuario_fb = UsuarioFacebook.objects.get(id=usuario_id)
+        
+        # Manejo seguro de ruta de imagen
+        img_path = None
+        if anuncio.imagen:
+            img_path = anuncio.imagen.path
+        
+        resultado = iniciar_publicacion_en_grupo(
+            announcement_id=announcement_id,
+            usuario=usuario_fb.email,
+            contrasena=usuario_fb.password,
+            mensaje=anuncio.descripcion,
+            grupo_url=grupo_url,
+            imagen_ruta=img_path
+        )
+        
+        if resultado:
+            # El contador se incrementa en tasks.py, no aquí
+            anuncio.refresh_from_db()  # ✅ Refrescar para obtener el valor actualizado
+            print(f"\n✅ ÉXITO - Total: {anuncio.publicaciones_realizadas}/{anuncio.total_publicaciones}")
+        
+        return bool(resultado)
+    
+    except Exception as e:
+        print(f"\n💥 ERROR: {str(e)}")
+        return False
+
+
+def publicar_en_facebook(anuncio_id, usuario_id, grupo_url):
+    return ejecutar_publicacion_facebook(anuncio_id, usuario_id, grupo_url)
+
+
+def realizar_publicacion(anuncio_id, usuario_id, grupo_url):
+    return ejecutar_publicacion_facebook(anuncio_id, usuario_id, grupo_url)
+
+
+def obtener_estadisticas_suspension():
+    """Obtiene estadísticas del sistema anti-suspensión"""
+    ahora = datetime.now()
+    hoy = ahora.date()
+    
+    stats = {
+        'publicaciones_hoy': {},
+        'ultima_actividad': {},
+        'patrones_recientes': len(gestor_suspension.historial_patrones),
+        'usuarios_activos': set()
+    }
+    
+    for key, count in gestor_suspension.limites_diarios.items():
+        if key.endswith(f"_{hoy}"):
+            usuario = key.replace(f"_{hoy}", "")
+            stats['publicaciones_hoy'][usuario] = count
+            stats['usuarios_activos'].add(usuario)
+    
+    for usuario, timestamp in gestor_suspension.ultima_actividad.items():
+        tiempo_desde = (ahora - timestamp).total_seconds() / 3600
+        stats['ultima_actividad'][usuario] = f"{tiempo_desde:.1f}h"
+    
+    return stats
