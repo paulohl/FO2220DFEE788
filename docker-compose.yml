@@ -1,0 +1,50 @@
+version: '3.8'  # Actualiza a la versión que funcione mejor con tu entorno
+
+services:
+  web:
+    build: 
+      context: .
+      args:
+        TZ: America/Havana
+    command: python3 manage.py runserver 0.0.0.0:8001
+    volumes:
+      - .:/code
+    ports:
+      - "8001:8001"
+    restart: always  # Asegura que el contenedor se reinicie siempre
+    depends_on:
+      - redis
+    environment:
+      - TZ=America/Havana
+
+  celery:
+    build:
+      context: .
+      args:
+        TZ: America/Havana
+    command: celery -A autofacebook worker --loglevel=info
+    volumes:
+      - .:/code
+    restart: always  # Asegura que el contenedor se reinicie siempre
+    depends_on:
+      - redis
+    environment:
+      - TZ=America/Havana
+
+  beat:
+    build:
+      context: .
+      args:
+        TZ: America/Havana
+    command: celery -A autofacebook beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/code
+    restart: always  # Asegura que el contenedor se reinicie siempre
+    depends_on:
+      - redis
+    environment:
+      - TZ=America/Havana
+
+  redis:
+    image: "redis:alpine"
+    restart: always  # Asegura que el contenedor se reinicie siempre
