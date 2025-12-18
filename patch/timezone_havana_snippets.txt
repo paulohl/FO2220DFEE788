@@ -1,0 +1,23 @@
+✅ Cambios solicitados (Cuba / America/Havana)
+
+A) Zona horaria (Cuba) en Playwright:
+- En obtener_configuracion_stealth():
+    'timezone': PUBLICATION_TZ
+- En browser.new_context(...):
+    timezone_id=config['timezone']
+
+B) Log visible para confirmar:
+- Añadir en iniciar_publicacion_en_grupo() justo después de:
+    config = obtener_configuracion_stealth()
+
+  esta línea:
+    logger.info(f"🕒 Publication timezone configured: {config.get('timezone')}")
+
+C) Nota sobre admin.py:
+- Para ver PUBLICADO/PENDIENTE/ELIMINADO en Django Admin se necesita:
+  1) guardar ese estado en BD (modelo/campo)
+  2) poblarlo desde el flujo de publicación
+  3) registrar y filtrar en admin.py
+
+  Si tu modelo ya tiene un campo (ej: estado_publicacion), te preparo el admin.py en 2 minutos.
+  Si no existe, esto es Fase 2 (persistencia + reportes).
