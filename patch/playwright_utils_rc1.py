@@ -72,6 +72,7 @@ def iniciar_publicacion_en_grupo(announcement_id, usuario, contrasena, mensaje, 
         with sync_playwright() as p:
             while intento_actual < max_intentos:
                 browser = context = page = None
+                estado_detectado = "DESCONOCIDO"
                 
                 try:
                     print(f"\n{'='*60}")
@@ -293,8 +294,7 @@ def iniciar_publicacion_en_grupo(announcement_id, usuario, contrasena, mensaje, 
                         # 1. Buscar indicadores de ÉXITO
                         indicadores_exito = [
                             'text="Hace un momento"', 
-                            'text="Just now"', 
-                            'div[role="feed"]'  # si volvemos al feed tras publicar
+                            'text="Just now"',                
                         ]
                         
                         for ind in indicadores_exito:
