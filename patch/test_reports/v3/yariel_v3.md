@@ -40,7 +40,7 @@ no me ha llegado aun
 
 
 
-yariel537     yDec 20, 7:38 PM     
+yariel537     Dec 20, 7:38 PM     
 el que me enviastes en los mensajes anteriores de 51kb da este error y no inicia
 
 
@@ -55,22 +55,26 @@ envieme el codigo correcto por favor
 
 
 
+
 Paulo HL     Dec 20, 8:32 PM     
-esta bes la verson completa actual, cualquia salir de     
+esta bes la verson completa actual, cualquier nueva version va salir desde esto v3, es la que mencionas? 1720 lineas     
 
 
-yariel537      Dec 20, 7:54 PM     
-envieme el codigo correcto por favorti
-sPaulo HL     Dec 20, 8:32 PM     
-Paulo HL     Dec 20, 8:32 PM     Paulo HL     Dec 20, 8:32 PM    Paulo HL     Dec 20, 8:32 PM   Paulo HL     Dec 20, 8:32 Pimage(10).png     (165.51 kB)
+playwright_utils_patched_v3.py     (50.44 kB)
+
+
+ 
+
+yariel537     Dec 20, 8:34 PM     
+como te decia, este codigo da problemas, te adjunto una captura para que lo veas
+
+
+image.png     (165.51 kB)
 ![image10](image(10).png "image(10).png")
 
 
 
-
-yariel537     Dec 21, 8:09 AM     
+yariel537     Dec 21, 8:09 AM
 Me envía el código correcto y funcional por favor?
 
 
-
-Paulo HL     Dec 21, 3:30 P
