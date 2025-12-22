@@ -1,7 +1,4 @@
-Paulo HL
-
-
-Dec 20, 7:32 PM     
+Paulo HL     Dec 20, 7:32 PM     
 Aquí tienes el archivo completo una vez mas (yo vi tu nuevo comentario pero dejame documentar la v3 total)  listo para la prueba: Download playwright_utils_patched_v3.py
 
 Recomendación práctica: reemplaza el archivo completo, y reinicia Celery + workers para evitar que quede código viejo cargado en memoria.
@@ -48,7 +45,7 @@ el que me enviastes en los mensajes anteriores de 51kb da este error y no inicia
 
 
 Captura_de_pantalla.png     (167.72 kB)
-![captura](Captura_de_pantalla.png "Captura_de_pantalla_2025-12-21_012502.png")
+![captura](Captura_de_patalla.png "Captura_de_pantalla_2025-12-21_012502.png")
 
 
 
@@ -63,31 +60,18 @@ Paulo HL
 Me
 
 Dec 20, 8:32 PM
-esta bes la verson completa actual, cualquier nueva version va salir desde esto v3, es la que mencionas? 1720 lineas
-
-playwright_utils_patched_v3.py
-
-(50.44 kB)
-
-Y
-yariel537
-
-Dec 20, 8:34 PM
-como te decia, este codigo da problemas, te adjunto una captura para que lo veas
+esta bes la verson completa actual, cualquia salir deyariel537      Dec 20, 7:54 PM     
+envieme el codigo correcto por favorti
+sPaulo HL     Dec 20, 8:32 PM     
+Paulo HL     Dec 20, 8:32 PM     Paulo HL     Dec 20, 8:32 PM    Paulo HL     Dec 20, 8:32 PM   Paulo HL     Dec 20, 8:32 Pimage(10).png     (165.51 kB)
+![image10](image(10).png "image(10).png")
 
 
-image.png
 
-(165.51 kB)
 
-Y
-yariel537
-
-Dec 21, 8:09 AM
+yariel537     Dec 21, 8:09 AM     
 Me envía el código correcto y funcional por favor?
 
-P
-Paulo HL
-Me
 
-Dec 21, 3:30 P
+
+Paulo HL     Dec 21, 3:30 P
