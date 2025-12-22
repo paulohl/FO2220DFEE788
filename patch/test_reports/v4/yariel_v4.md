@@ -1,3 +1,21 @@
+Dec 21, 4:19 PM      
+Hola Yariel,
+
+Ya te envío el archivo completo y corregido playwright_utils.py.     
+Esta versión ya no tiene errores de sintaxis, carga correctamente en Django/Celery y mantiene todas las funciones del módulo, con los ajustes que comentamos (timezone Cuba y verificación post-publicación).
+
+Por favor:
+- Reemplaza el archivo completo por este.
+- Reinicia los workers de Celery.
+- Prueba una o dos publicaciones como hiciste antes.
+
+Si aparece algún error nuevo, envíame solo la línea clave del error (la que indica archivo y número de línea) y lo revisamos de forma puntual.
+
+Quedo atento a tus pruebas.
+
+playwright_utils_v4.py     (48.9 kB)
+
+
 yariel537     Dec 21, 6:02 PM     
 Aparece como DESCONOCIDO pero el anuncio fue correctamente publicado
 
