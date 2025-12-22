@@ -1,0 +1,200 @@
+
+
+
+
+
+
+yariel537
+
+Dec 20, 7:50 AM
+Otra publicacion en exito y dio desconocido
+
+Download All
+
+image.png
+
+(221.92 kB)
+
+
+image.png
+
+(20.86 kB)
+
+Y
+yariel537
+
+Dec 20, 4:28 PM
+Creo que seria mejor centrarnos en la parte del inicio de sección (login) de un usuario nuevo y que parezca más humano por lo que me recomendastes, ya luego este tema de PUBLICADO, PENDIENTE, DESCONOCIDO, el admin.py con estos reportes, etc
+
+P
+Paulo HL
+Me
+
+Dec 20, 4:42 PM
+te conteto ahorita
+
+P
+Paulo HL
+Me
+
+Dec 20, 6:14 PM
+Hola Yariel, gracias por la paciencia y por probarlo en ambiente real. Sé que es frustrante, pero este es el proceso estándar: probar en vivo, aislar señales, ajustar y volver a medir. Con tus tests estamos pudiendo analizar el problema de forma quirúrgica (no a ciegas), y eso es lo que permite corregirlo de verdad.
+
+Te acabo de preparar y dejar listo un playwright_utils.py COMPLETO, autocontenido, para que lo pegues tal cual (sin riesgo de “me faltó un pedazo” o “se copió mal”). Incluye dos cosas que pediste explícitamente:
+
+playwright_utils.py
+
+(27.43 kB)
+
+P
+Paulo HL
+Me
+
+Dec 20, 6:15 PM
+1 Timezone Cuba (America/Havana) dentro del navegador.
+
+2 Todo dentro del mismo playwright_utils.py.
+
+Además incluye un cambio crítico para evitar los errores previos de Celery: agregué el wrapper ejecutar_publicacion_facebook(), así Celery ya no rompe con “cannot import name…”.
+
+P
+Paulo HL
+Me
+
+Dec 20, 6:17 PM
+Sobre tu duda del IP Alemania vs horario Cuba: el timezone del navegador (lo que “ve” Facebook como reloj del cliente) se puede configurar a Cuba sin problema; que el servidor esté en Alemania significa que el IP geolocaliza allí. Eso puede ser “inconsistente”, pero es común (VPNs, servidores remotos, etc.). No es garantía de nada, pero no es un error del script: es una condición del entorno.
+
+Lo más importante: también reforcé el flujo para aumentar naturalidad sin hacer “ruido”.
+- ausas realistas antes del clic final (hesitación humana).
+- No cerrar inmediatamente después de publicar.
+- Ritmo total por intento parecido a manual (10–30s como me dijiste).
+
+Y
+yariel537
+
+Dec 20, 6:18 PM
+Pudieras revisar si me distes el código correcto? Este pesa 28kb y normalmente no pesa menos de 45kb
+
+Y
+yariel537
+
+Dec 20, 6:19 PM
+Creo que no me lo distes completo y puede que falte alguna función, es posible?
+
+Y
+yariel537
+
+Dec 20, 6:19 PM
+Puede comprobarlo por favor?
+
+P
+Paulo HL
+Me
+
+Dec 20, 6:19 PM
+Finalmente, corregí el punto que te estaba molestando: que a veces marque “PUBLICADO” o “DESCONOCIDO” con resultados raros.
+Ahora la verificación no depende solo de que Facebook muestre algo en el cuadro: después de publicar, el script va a “Tu contenido” del grupo y revisa:
+- Publicado (/my_posted_content)
+- Pendiente (/my_pending_content)
+
+Esto evita falsos positivos y nos da una lectura real por grupo.
+
+Cuando pegues el archivo completo:
+1. Reinicia los workers/containers (para que Celery recargue el código).
+2. Prueba primero en los 3 grupos que mencionaste.
+3. Si vuelve a salir “DESCONOCIDO”, me pasas la captura de “Tu contenido” y el log de esa ejecución y lo afinamos (ya con evidencia exacta del caso).
+
+P
+Paulo HL
+Me
+
+Dec 20, 6:23 PM
+admin.py no, en esta entrega no toqué admin.py porque eso implica persistir estados en BD + modelos + migrations + pantalla (prox. fase). En esta fase lo dejamos 100% en playwright_utils.py, como pediste.
+
+P
+Paulo HL
+Me
+
+Dec 20, 6:23 PM
+además de timezone, metí el fix del ImportError y la verificación por Tu contenido, porque eso es lo que estaba causando el “DESCONOCIDO”/falsos positivos y los errores de Celery.
+
+Y
+yariel537
+
+Dec 20, 6:24 PM
+Por favor enviame el código completo
+
+Y
+yariel537
+
+Dec 20, 6:24 PM
+El que me enviastes es pequeño, es esto correcto?
+
+
+
+Paulo HL     Dec 20, 6:43 PM     
+tambien te lo envi'e una solicitud de extension, como estos proyectos de desarrollos son intensos,y tu y te convertiste en algo más que un cliente, te convertiste en un socio. No presté atención a los requisitos de Fiverr. Solo les pido que aprueben la extensión del plazo (solo el plazo, sin costo adicional) para que Fiverr no me penalice.
+
+
+
+playwright_utils.py     (27.43 kB)
+
+
+
+Paulo HL      Dec 20, 6:45 PM      
+772 lineas de codigo
+
+
+
+yariel537     Dec 20, 6:47 PM     
+Pruebo ahora y le comento
+
+
+
+yariel537     Dec 20, 6:50 PM     
+el anterior tenia 1270 lineas de codigo
+
+
+
+Paulo HL     Dec 20, 6:53 PM     
+lo primero que tu me enviaste original? los que estoy tratando no est'an 100% con todas las lineas por las pruebas, tu crees que estou puede estar impactando
+
+
+
+yariel537     Dec 20, 6:55 PM
+No, el ultmo que me enviastes tenia 1270, probaré este ahora y le digo
+
+
+
+yariel537     Dec 20, 7:01 PM     
+ou puede estar impactando
+Y
+yyariel537     Dec 20, 6:55 PM     
+No, el ultmo que me enviastes tenia 1270, probaré este ahora y le digonc
+oyariel537     Dec 20, 7:01 PM     
+No me publica el anuncioy
+ uyariel537     Dec 20, 7:01 PM     
+con este codigo como le decia, le faltan lineas y funciones para que funcione0
+
+
+Paulo HL     Dec 20, 7:18 PM     
+ABAJO COPIO TAL y cual el contenido de mi borradorsin organiarlo com reporte para adelan
+
+.
+yariel537     Dec 20, 7:19 PM     
+sorry no le entendiyariel537     Dec 20, 7:19 PM     sorry no le ene envia ahora es ya con las ultimas modificaciones que me comentastes anteriormente? o es el codigo original ultimo que habias enviado hace unos dias atras?
+
+Y
+yariel537
+
+Dec 20, 7:25 PM
+no funciona este codigo
+
+
+image.png
+
+(167.72 kB)
+
+P
+5 PM
+no funci
