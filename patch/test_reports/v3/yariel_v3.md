@@ -49,18 +49,17 @@ Captura_de_pantalla.png     (167.72 kB)
 
 
 
-Y
-yariel537
 
-Dec 20, 7:54 PM
+yariel537     Dec 20, 7:54 PM     
 envieme el codigo correcto por favor
 
-P
-Paulo HL
-Me
 
-Dec 20, 8:32 PM
-esta bes la verson completa actual, cualquia salir deyariel537      Dec 20, 7:54 PM     
+
+Paulo HL     Dec 20, 8:32 PM     
+esta bes la verson completa actual, cualquia salir de     
+
+
+yariel537      Dec 20, 7:54 PM     
 envieme el codigo correcto por favorti
 sPaulo HL     Dec 20, 8:32 PM     
 Paulo HL     Dec 20, 8:32 PM     Paulo HL     Dec 20, 8:32 PM    Paulo HL     Dec 20, 8:32 PM   Paulo HL     Dec 20, 8:32 Pimage(10).png     (165.51 kB)
