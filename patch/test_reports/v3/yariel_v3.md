@@ -45,14 +45,7 @@ el que me enviastes en los mensajes anteriores de 51kb da este error y no inicia
 
 
 Captura_de_pantalla.png     (167.72 kB)
-![captura](Captura_de_patalla.png "Captura_de_pantalla_2025-12-21_012502.png")
-
-
-
-
-yariel537     Dec 20, 7:54 PM     
-envieme el codigo correcto por favor
-
+![captura](Captura_de_pantalla.png "Captura_de_pantalla.png")
 
 
 
@@ -62,19 +55,18 @@ esta bes la verson completa actual, cualquier nueva version va salir desde esto 
 
 playwright_utils_patched_v3.py     (50.44 kB)
 
-
  
 
 yariel537     Dec 20, 8:34 PM     
 como te decia, este codigo da problemas, te adjunto una captura para que lo veas
 
 
-image.png     (165.51 kB)
+image(10).png     (165.51 kB)
 ![image10](image(10).png "image(10).png")
 
 
 
-yariel537     Dec 21, 8:09 AM
+yariel537     Dec 21, 8:09 AM     
 Me envía el código correcto y funcional por favor?
 
 
