@@ -81,18 +81,12 @@ yariel537
 Dec 20, 6:19 PM
 Creo que no me lo distes completo y puede que falte alguna función, es posible?
 
-Y
-yariel537
 
-Dec 20, 6:19 PM
-Puede comprobarlo por favor?
 
-P
-Paulo HL
-Me
+yariel537     Dec 20, 6:19 PM     
+Puede comprobarlo por favor?Dec 20, 6:19 PMPuede comprobarlyariel537   e
 
-Dec 20, 6:19 PM
-Finalmente, corregí el punto que te estaba molestando: que a veces marque “PUBLICADO” o “DESCONOCIDO” con resultados raros.
+nte, corregí el punto que te estaba molestando: que a veces marque “PUBLICADO” o “DESCONOCIDO” con resultados rarosFinalmente, corregí el punto que te estaba molestando: que a veces marque “PUBLICADO” o “DESCONOCIDO” con resultados raros
 Ahora la verificación no depende solo de que Facebook muestre algo en el cuadro: después de publicar, el script va a “Tu contenido” del grupo y revisa:
 - Publicado (/my_posted_content)
 - Pendiente (/my_pending_content)
@@ -104,31 +98,19 @@ Cuando pegues el archivo completo:
 2. Prueba primero en los 3 grupos que mencionaste.
 3. Si vuelve a salir “DESCONOCIDO”, me pasas la captura de “Tu contenido” y el log de esa ejecución y lo afinamos (ya con evidencia exacta del caso).
 
-P
-Paulo HL
-Me
 
-Dec 20, 6:23 PM
-admin.py no, en esta entrega no toqué admin.py porque eso implica persistir estados en BD + modelos + migrations + pantalla (prox. fase). En esta fase lo dejamos 100% en playwright_utils.py, como pediste.
+Paulo HL     Dec 20a    
 
-P
-Paulo HL
-Me
+admin.py no, en esta entrega no toqué admin.py porque eso implica persistir estados en BD + modelos + migrations + pantalla (prox. fase). En esta fase lo dejamos 100% en playwright_utils.py, como pediste
 
-Dec 20, 6:23 PM
+
+
+Paulo HL     Dec 20, 6:23 PM     
 además de timezone, metí el fix del ImportError y la verificación por Tu contenido, porque eso es lo que estaba causando el “DESCONOCIDO”/falsos positivos y los errores de Celery.
 
-Y
-yariel537
 
-Dec 20, 6:24 PM
-Por favor enviame el código completo
 
-Y
-yariel537
-
-Dec 20, 6:24 PM
-El que me enviastes es pequeño, es esto correcto?
+yarie 
 
 
 
@@ -168,33 +150,42 @@ No, el ultmo que me enviastes tenia 1270, probaré este ahora y le digo
 
 yariel537     Dec 20, 7:01 PM     
 ou puede estar impactando
-Y
-yyariel537     Dec 20, 6:55 PM     
-No, el ultmo que me enviastes tenia 1270, probaré este ahora y le digonc
-oyariel537     Dec 20, 7:01 PM     
-No me publica el anuncioy
- uyariel537     Dec 20, 7:01 PM     
-con este codigo como le decia, le faltan lineas y funciones para que funcione0
+
+
+
+yariel537     Dec 20, 7:01 PM     
+No me publica el anuncio
+
+
+
+yariel537     Dec 20, 7:01 PM     
+con este codigo como le decia, le faltan lineas y funciones para que funcione
+
 
 
 Paulo HL     Dec 20, 7:18 PM     
 ABAJO COPIO TAL y cual el contenido de mi borradorsin organiarlo com reporte para adelan
 
-.
+
+
+Paulo HL     Dec 20, 7:19 PM     
+tar la explicacion
+
+
+
 yariel537     Dec 20, 7:19 PM     
-sorry no le entendiyariel537     Dec 20, 7:19 PM     sorry no le ene envia ahora es ya con las ultimas modificaciones que me comentastes anteriormente? o es el codigo original ultimo que habias enviado hace unos dias atras?
+sorry no le entendi
 
-Y
-yariel537
 
-Dec 20, 7:25 PM
+
+yariel537     Dec 20, 7:19 PM     
+este codigo que me envia ahora es ya con las ultimas modificaciones que me comentastes anteriormente? o es el codigo original ultimo que habias enviado hace unos dias atras?
+
+
+
+yariel537     Dec 20, 7:25 PM      
 no funciona este codigo
 
 
-image.png
+image.png     (167.72 kB)
 
-(167.72 kB)
-
-P
-5 PM
-no funci
