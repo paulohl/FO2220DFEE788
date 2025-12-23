@@ -36,27 +36,34 @@ vale?
 
 
 </br>
-yariel537    Dec 20, 7:33 PM     
+yariel537    Dec 20, 7:33 PM       
+
 Vale, envieme el archivo por favor       
 
 
 </br>
 yariel537     Dec 20, 7:33 PM     
+
 no me ha llegado aun            
 
 
 </br>
-yariel537     Dec 20, 7:38 PM     
+yariel537     Dec 20, 7:38 PM       
+
 el que me enviastes en los mensajes anteriores de 51kb da este error y no inicia       
 
+<br>
+captura_de_pantalla.png     (167.72 kB)       
 
-Captura_de_pantalla.png     (167.72 kB)        
+</br>
+</br>
 
 ![captura](Captura_de_pantalla.png "Captura_de_pantalla.png")       
 
 
 </br>
-Paulo HL     Dec 20, 8:32 PM     
+Paulo HL     Dec 20, 8:32  
+
 esta bes la verson completa actual, cualquier nueva version va salir desde esto v3, es la que mencionas? 1720 lineas     
 
 
