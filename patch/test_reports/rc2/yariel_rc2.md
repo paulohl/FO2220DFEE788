@@ -355,10 +355,7 @@ como te decia, este codigo da problemas, te adjunto una captura para que lo veas
 
 
 image.png        (165.51 kB)       
-
-
-
-
+![image.png](image.png "image.png")       
 
 
 </br>
