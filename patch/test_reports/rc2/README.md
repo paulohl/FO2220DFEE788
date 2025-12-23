@@ -42,7 +42,7 @@ yariel537     Dec 20, 7:09 AM
 
 image(y).png     (490.93 kB)     
 
-<img src="image(y).png" alt="image(y).png" title=" " width="600">
+<img src="image(y).png" alt="image(y).png" title=" " width="800">
 
 
 image(z).png     (30.34 kB)      
