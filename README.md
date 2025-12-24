@@ -97,24 +97,26 @@ iniciar_publicacion_en_grupo(...)
 
 __Role__:       
 
-This is the orchestrator. Nothing else publishes by itself.
-It controls retries, browser lifecycle, logging, and the final return value.
-Responsibilities:       
+This is the __orchestrator__. Nothing else publishes by itself.      
+It controls retries, browser lifecycle, logging, and the final return value.     
+
+__Responsibilities__:       
 
 - Validate inputs
 - Prepare text & image
 - Launch browser + context
 - Drive login → group → publish → verification
-
-
-Decide final ok / estado_detectado
+- Decide final `ok / estado_detectado`
 
 
 
 ### 2️⃣ Input validation
-Inside iniciar_publicacion_en_gif not grupo_url or not grupo_url.startswith('http'):       
+Inside `iniciar_publicacion_en_grupo`      
 
+```
+if not grupo_url or not grupo_url.startswith('http'):
     return False
+```
 
 __Why__:      
 
@@ -122,240 +124,199 @@ Fail fast. Prevents wasted browser sessions and confusing downstream errors.
 
 
 ### 3️⃣ Image preparation (anti-hash)      
-modificar_imagen_antihash(imagen_ruta)      
+`modificar_imagen_antihash(imagen_ruta)`      
+
 Called from:      
-iniciar_publicacion_en_grupo       
+`iniciar_publicacion_en_grupo`       
+
 
 __Role__:
 
+- Creates a __temporary image variant__ (tiny pixel / metadata changes)      
+- Avoids uploading byte-identical images repeatedly
 
-Creates a temporary image variant (tiny pixel / metadata changes)
+__Lifecycle__:      
 
-
-Avoids uploading byte-identical images repeatedly
-
-
-__Lifecycle__:
-
-
-Temporary file is created
-
-
-Used once
-
-
-Deleted in finally cleanup
-
+- Temporary file is created
+- Used once
+- Deleted in `finally` cleanup
 
 
 ### 4️⃣ Text preparation (polymorphism)
-aplicar_variacion_natural_automatica(mensaje)      
+`aplicar_variacion_natural_automatica(mensaje)`      
 
-__Role__:
+__Role__:      
 
+- Produces a semantically identical message
+- With tiny harmless variations (spacing, punctuation, invisible changes)
 
-Produces a semantically identical message
+__Why__:       
 
-
-With tiny harmless variations (spacing, punctuation, invisible changes)
-
-
-__Why__:
-Prevents Facebook seeing identical payloads across posts.
-
-### 5️⃣ Cookie management
-cargar_cookies_desde_json(...)      
-Django cache.get(...) / cache.set(...)      
-
-__Role__:
+Prevents Facebook seeing identical payloads across posts.      
 
 
-Restore previous login sessions
+### 5️⃣ Cookie management      
+
+`cargar_cookies_desde_json(...)`      
+
+__Django__ `cache.get(...)` / `cache.set(...)`      
+
+__Role__:      
+
+- Restore previous login sessions
+- Reduce repeated logins (major risk factor)
+
+__Flow__:      
+
+- Try cache
+- Fallback to JSON
+- Save cookies again after successful login
 
 
-Reduce repeated logins (major risk factor)
+### 6️⃣ Stealth configuration      
 
+`obtener_configuracion_stealth()`      
 
-__Flow__:
+__Provides__:      
 
-
-Try cache
-
-
-Fallback to JSON
-
-
-Save cookies again after successful login
-
-
-
-### 6️⃣ Stealth configuration
-obtener_configuracion_stealth()      
-
-__Provides__:
-
-
-viewport
-
-
-locale
-
-
-timezone → America/Havana
-
-
-user_agent
-
+- `viewport`
+- `locale`
+- `timezone` → __America/Havana__
+- `user_agent`
 
 __Used in__:      
-context = browser.new_context(...)
+
+`context = browser.new_context(...)`      
 
 __Why__:      
-Ensures browser “lives” in Cuba time, regardless of server IP (Germany).
 
-### 7️⃣ Virtual display (Xvfb)
-detectar_xvfb()
-iniciar_xvfb()
-Role:
+Ensures browser “lives” in Cuba time, regardless of server IP (Germany).      
 
+      
+### 7️⃣ Virtual display (Xvfb)      
 
-If available, runs Chromium non-headless inside virtual display
+      `detectar_xvfb()`      
+ 
+      `iniciar_xvfb()`      
 
+__Role__:      
 
-More stable + closer to real browser behavior
-
-
-
-### 8️⃣ Browser & context creation
-Playwright core calls
-browser = p.chromium.launch(...)
-context = browser.new_context(...)
-page = context.new_page()
-
-Plus anti-detection injection:
-context.add_init_script(...)
-
-Purpose:
-Remove obvious automation fingerprints (navigator.webdriver).
-
-### 9️⃣ Login verification & execution
-verificar_inicio_sesion(page)
-hacer_clic_boton_login(page)
-Logic:
+- If available, runs Chromium non-headless inside virtual display
+- More stable + closer to real browser behavior
 
 
-If already logged in → continue
+### 8️⃣ Browser & context creation      
+
+__Playwright core calls__      
+
+      browser = p.chromium.launch(...)      
+      context = browser.new_context(...)
+      page = context.new_page()
+     
+
+__Plus anti-detection injection__:
+      
+      context.add_init_script(...)
+
+__Purpose__:      
+
+Remove obvious automation fingerprints `(navigator.webdriver)`      
 
 
-Else:
+### 9️⃣ Login verification & execution      
+
+      verificar_inicio_sesion(page)      
+
+      hacer_clic_boton_login(page)      
 
 
-Fill email
+__Logic__:      
+
+- If already logged in → continue
+- Else:
+- Fill email
+- Fill password
+- Click login
+- Verify again
+- Save cookies
+
+__Key point__:       
+
+Login logic is __idempotent and__ safe to entry.     
 
 
-Fill password
+#### 🔟 Navigation to group       
+
+      page.goto(grupo_url)      
+      
+__Followed by__:      
+
+      - esperar_tiempo_aleatorio(...)      
+
+      - page.screenshot(...)      
+
+      
+__Why screenshots exist__:      
+
+Every major phase leaves forensic evidence      
 
 
-Click login
+#### 1️⃣1️⃣ Human interaction warm-up      
+
+      interacciones_aleatorias_avanzadas(page)      
+      
+__Role__:      
+
+- Scrolls
+- Small pauses
+- Light interactions
+
+__Why__:      
+
+Avoid “cold teleport → post → exit” pattern.      
 
 
-Verify again
+#### 1️⃣2️⃣ Open post composer      
 
+__Selectors tried in order__"     
 
-Save cookies
+- Buttons with “¿Qué estás pensando?”
+- “Escribe algo”      
+- Keyboard fallback (p)
 
-
-
-
-Key point:
-Login logic is idempotent and safe to retry.
-
-#### 🔟 Navigation to group
-page.goto(grupo_url)
-
-Followed by:
-
-
-esperar_tiempo_aleatorio(...)
-
-
-page.screenshot(...)
-
-
-Why screenshots exist:
-Every major phase leaves forensic evidence.
-
-#### 1️⃣1️⃣ Human interaction warm-up
-interacciones_aleatorias_avanzadas(page)
-Role:
-
-
-Scrolls
-
-
-Small pauses
-
-
-Light interactions
-
-
-Why:
-Avoid “cold teleport → post → exit” pattern.
-
-#### 1️⃣2️⃣ Open post composer
-Selectors tried in order:
-
-
-Buttons with “¿Qué estás pensando?”
-
-
-“Escribe algo”
-
-
-Keyboard fallback (p)
-
-
-Failure here = hard stop
+__Failure here = hard stop__      
 (no post possible).
 
-#### 1️⃣3️⃣ Insert text (ultra-robust)
-insertar_texto_ultra_robusto(page, selector, texto)
-Behavior:
+
+#### 1️⃣3️⃣ Insert text (ultra-robust)      
+
+      insertar_texto_ultra_robusto(page, selector, texto)      
+
+__Behavior__:      
+
+- Human typing simulation
+- Random delays
+- Optional micro-errors
+- Verifies visible text count
+
+__Why__:     
+
+Direct `fill()` is risky and detectable      
 
 
-Human typing simulation
+#### 1️⃣4️⃣ Image upload      
 
+__Flow__:      
 
-Random delays
+- Click “Foto/Video”
+- Find `<input type="file">`
+- 'set_input_files(...)'
+- Wait + screenshot
 
+__Important__:      
 
-Optional micro-errors
+Image upload is optional and isolated.    
 
-
-Verifies visible text count
-
-
-Why:
-Direct .fill() is risky and detectable.
-
-#### 1️⃣4️⃣ Image upload
-Flow:
-
-
-Click “Foto/Video”
-
-
-Find <input type="file">
-
-
-set_input_files(...)
-
-
-Wait + screenshot
-
-
-Important:
-Image upload is optional and isolated.
 
 #### 1️⃣5️⃣ Publish click
 Two attempts:
