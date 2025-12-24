@@ -1,7 +1,14 @@
 # FO2220DFEE788
 Facebook Posting Flow Optimization (Playwright + Django)       
 
-# Walkthrough: What the script does 
+--------------------------------
+--------------------------------
+
+
+# Walkthrough: What the script does       
+
+
+
 
 1) __Receives a posting job__
 - It’s called with: Facebook user credentials, a target group URL, the message text, and optionally an image path (plus an `announcement_id` for tracking/logging).
@@ -89,11 +96,21 @@ Facebook Posting Flow Optimization (Playwright + Django)
 - Stops Xvfb (if started).
 
 
-# Walkthrough with functions and responsibilities
-This section explains what happens, where, and why, using the real structure of the code.
 
-### 1️⃣ Entry point: main publication flow
-iniciar_publicacion_en_grupo(...)      
+-----------------------------
+-----------------------------      
+
+
+
+# Walkthrough with functions and responsibilities
+This section explains what happens, where, and why, using the real structure of the code.      
+
+------
+
+### 1️⃣ Entry point: main publication flow      
+
+      iniciar_publicacion_en_grupo(...)      
+      
 
 __Role__:       
 
@@ -109,25 +126,27 @@ __Responsibilities__:
 - Decide final `ok / estado_detectado`
 
 
+### 2️⃣ Input validation      
 
-### 2️⃣ Input validation
 Inside `iniciar_publicacion_en_grupo`      
 
-```
-if not grupo_url or not grupo_url.startswith('http'):
-    return False
-```
+      if not grupo_url or not grupo_url.startswith('http'):      
+            return False
 
 __Why__:      
 
-Fail fast. Prevents wasted browser sessions and confusing downstream errors.      
+Fail fast. Prevents wasted browser sessions and confusing downstream errors.            
 
+------
 
-### 3️⃣ Image preparation (anti-hash)      
-`modificar_imagen_antihash(imagen_ruta)`      
+### 3️⃣ Image preparation (anti-hash)        
+      
+      modificar_imagen_antihash(imagen_ruta)      
+
 
 Called from:      
-`iniciar_publicacion_en_grupo`       
+      
+      iniciar_publicacion_en_grupo       
 
 
 __Role__:
@@ -135,15 +154,18 @@ __Role__:
 - Creates a __temporary image variant__ (tiny pixel / metadata changes)      
 - Avoids uploading byte-identical images repeatedly
 
+
 __Lifecycle__:      
 
 - Temporary file is created
 - Used once
 - Deleted in `finally` cleanup
 
+------
 
-### 4️⃣ Text preparation (polymorphism)
-`aplicar_variacion_natural_automatica(mensaje)`      
+### 4️⃣ Text preparation (polymorphism)      
+      
+      aplicar_variacion_natural_automatica(mensaje)      
 
 __Role__:      
 
@@ -154,6 +176,7 @@ __Why__:
 
 Prevents Facebook seeing identical payloads across posts.      
 
+======
 
 ### 5️⃣ Cookie management      
 
@@ -172,10 +195,11 @@ __Flow__:
 - Fallback to JSON
 - Save cookies again after successful login
 
+----------
 
 ### 6️⃣ Stealth configuration      
 
-`obtener_configuracion_stealth()`      
+      obtener_configuracion_stealth()      
 
 __Provides__:      
 
@@ -186,12 +210,14 @@ __Provides__:
 
 __Used in__:      
 
-`context = browser.new_context(...)`      
+      context = browser.new_context(...)      
+
 
 __Why__:      
 
 Ensures browser “lives” in Cuba time, regardless of server IP (Germany).      
 
+--------
       
 ### 7️⃣ Virtual display (Xvfb)      
 
@@ -201,9 +227,10 @@ Ensures browser “lives” in Cuba time, regardless of server IP (Germany).
 
 __Role__:      
 
-- If available, runs Chromium non-headless inside virtual display
+- If available, runs Chromium __non-headless__ inside virtual display
 - More stable + closer to real browser behavior
 
+-------
 
 ### 8️⃣ Browser & context creation      
 
@@ -242,8 +269,9 @@ __Logic__:
 
 __Key point__:       
 
-Login logic is __idempotent and__ safe to entry.     
+Login logic is __idempotent__ and safe to entry.     
 
+-------------------
 
 #### 🔟 Navigation to group       
 
@@ -260,6 +288,7 @@ __Why screenshots exist__:
 
 Every major phase leaves forensic evidence      
 
+------------
 
 #### 1️⃣1️⃣ Human interaction warm-up      
 
@@ -275,14 +304,18 @@ __Why__:
 
 Avoid “cold teleport → post → exit” pattern.      
 
+------------
 
 #### 1️⃣2️⃣ Open post composer      
+
+
 
 __Selectors tried in order__"     
 
 - Buttons with “¿Qué estás pensando?”
 - “Escribe algo”      
-- Keyboard fallback (p)
+- Keyboard fallback (`p`)
+
 
 __Failure here = hard stop__      
 (no post possible).
@@ -296,29 +329,30 @@ __Behavior__:
 
 - Human typing simulation
 - Random delays
-- Optional micro-errors
-- Verifies visible text count
+icro-errors
+- Verifies v- Verifies visible text count
 
 __Why__:     
 
-Direct `fill()` is risky and detectable      
+Direct `.fill()` is risky and detectable.      
+    
+
+- Click “Fot- Click “Foto/Video"
+- Find  `<input type="file">`.reenshot
+
+__Important
 
 
-#### 1️⃣4️⃣ Image upload      
-
-__Flow__:      
-
-- Click “Foto/Video”
-- Find `<input type="file">`
-- 'set_input_files(...)'
-- Wait + screenshot
-
-__Important__:      
+__:      
 
 Image upload is optional and isolated.    
 
 
-#### 1️⃣5️⃣ Publish click
+#### 1️⃣
+
+
+
+5️⃣ Publish click
 Two attempts:
 
 
