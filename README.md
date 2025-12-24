@@ -348,127 +348,96 @@ __:
 Image upload is optional and isolated.    
 
 
-#### 1️⃣
+#### 1️⃣5️⃣ Publish click     
+
+__Two attempts__:       
+
+1- Primary selector  - Primary selector (ar`)     
+2- Fallback text-based selector      
+
+__Includes__:      
+
+- Pre-click hesitation
+- Post-click pause
+
+#### 1️⃣6️⃣ Post-publication verification (CRITICAL)      
+
+      verificar_estado_en_tu_contenido(page, grupo_url, texto_completo)      
+
+__This is the heart of the fix__.      
+
+
+__Steps__:      
+
+1. Navigate to:
+- '/my_pending_content'
+- '/my_posted_content'
+2. Look for:
+- “Hace un momento”
+- “Just now”
+- Partial text fingerprint
+3. __Decide__:
+- `PUBLICADO`
+- `PENDIENTE`
+- `DESCONOCIDO`
+
+__Key design choice__:      
+
+- `DESCONOCIDO` ≠ failure
+- Avoids Celery repost loops
+
+----------
+
+#### 1️⃣7️⃣ Result handling      
+
+Inside `iniciar_publicacion_en_grupo`:      
+
+      if estado_detectado in ("PUBLICADO", "PENDIENTE"):      
+           resultado_final = True
+      else:
+           resultado_final = False
+ 
+__Why__:      
+
+Celery must not retry posts that likely succeeded.      
+
+-----------      
+
+
+#### 1️⃣8️⃣ Activity tracking      
+
+     gestor_suspension.registrar_actividad(...)      
+
+
+__Role__:      
+
+- Tracks per-user / per-group activity
+- Helps avoid overposting patterns
 
 
 
-5️⃣ Publish click
-Two attempts:
+#### 1️⃣9️⃣ Cleanup (always runs)      
 
-
-Primary selector (aria-label="Publicar")
-
-
-Fallback text-based selector
-
-
-Includes:
-
-
-Pre-click hesitation
-
-
-Post-click pause
-
-
-
-#### 1️⃣6️⃣ Post-publication verification (CRITICAL)
-verificar_estado_en_tu_contenido(page, grupo_url, texto_completo)
-This is the heart of the fix.
-Steps:
-
-
-Navigate to:
-
-
-/my_pending_content
-
-
-/my_posted_content
-
-
-
-
-Look for:
-
-
-“Hace un momento”
-
-
-“Just now”
-
-
-Partial text fingerprint
-
-
-
-
-__Decide__:
-
-
-PUBLICADO
-
-
-PENDIENTE
-
-
-DESCONOCIDO
-
-
-
-
-Key design choice:
-
-
-DESCONOCIDO ≠ failure
-
-
-Avoids Celery repost loops
-
-
-
-#### 1️⃣7️⃣ Result handling
-Inside iniciar_publicacion_en_grupo:
-if estado_detectado in ("PUBLICADO", "PENDIENTE"):
-    resultado_final = True
-else:
-    resultado_final = False
-
-Why:
-Celery must not retry posts that likely succeeded.
-
-#### 1️⃣8️⃣ Activity tracking
-gestor_suspension.registrar_actividad(...)      
-
-__Role__:
-
-
-Tracks per-user / per-group activity
-
-
-Helps avoid overposting patterns
-
-
-
-#### 1️⃣9️⃣ Cleanup (always runs)
 In `finally` blocks:      
 - Close context
 - Close browser
 - Delete temp image
 - Stop Xvfb
 
-__No resource leaks__. __No ghost browsers__.
+__No resource leaks__. __No ghost browsers__.      
+
+--------
 
 #### 2️⃣0️⃣ Single exit point      
-```
-return resultado_final
-```
+
+      return resultado_final  
 
 With full debug log:      
-```
-[DEBUG] Retorno final desde iniciar_publicacion_en_grupo
-```
 
+      [DEBUG] Retorno final desde iniciar_publicacion_en_grupo
+
+
+==============
 
 ## Architecture Diagram - Why this is compliant
 
@@ -502,6 +471,8 @@ flowchart LR
   P  PU -->|screenshots + logs| LOG[Capturas/Logs]
 
 ```
+
+-------------
 
 ### Sequence (runtime steps)      
 
@@ -538,14 +509,11 @@ sequenceDiagram
 
 1) ### Why this is compliant__” No bypassing / no “control” over Facebook  
 
-This implementation does not attempt to circumvent Facebook’s moderation, review queues, or enforcement systems.      
-It accepts that some groups will route posts to Pending, and it avoids any “guaranteed approval” claims because approval is controlled by Facebook and group admins—not by code.
+This implementation __does not attempt to circumvent__ Facebook’s moderation, review queues, or enforcement systems. It accepts that some groups will route posts to Pending, and it avoids any “guaranteed approval” claims because approval is controlled by Facebook and group admins—not by code.
 
 2) ### Verification is “honest,” not evasive
 
-The verification step checks the official UI outcome      
-(“Tu contenido” → _Publicado / Pendiente_) rather than assuming success based on a click or a feed indicator.       
-That reduces false positives and prevents automated retries that could look like spam.
+The verification step checks the __official UI outcome__ (“Tu contenido” → _Publicado / Pendiente_) rather than assuming success based on a click or a feed indicator. That reduces false positives and prevents automated retries that could look like spam.
 
 3) ### Minimizes risk signals instead of exploiting vulnerabilities
 
@@ -566,13 +534,11 @@ The system stores only what it needs to operate:
 
 No attempt is made to harvest unrelated user data, scrape private content, or expand access beyond the authenticated account’s normal visibility.
 
-
-
 5) ### Respectful execution patterns
 
 Operationally, the design supports safer usage patterns:      
-- rate limiting via pacing and activity tracking (gestor_suspension),
-- retries are controlled, and DESCONOCIDO can be treated carefully to avoid repost storms,
+- rate limiting via pacing and activity tracking (`gestor_suspension)`),
+- retries are controlled, and __DESCONOCIDO__ can be treated carefully to avoid repost storms,
 - per-account distribution can reduce concentration risk (while still respecting platform rules).
 
 6) ### Prefer official APIs when available
