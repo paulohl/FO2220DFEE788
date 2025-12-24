@@ -1,5 +1,94 @@
 # FO2220DFEE788
-Facebook Posting Flow Optimization (Playwright + Django)
+Facebook Posting Flow Optimization (Playwright + Django)       
+
+# Walkthrough: What the script does 
+
+1) __Receives a posting job__
+- It’s called with: Facebook user credentials, a target group URL, the message text, and optionally an image path (plus an `announcement_id` for tracking/logging).
+
+2) __Validates the group URL__
+- If the URL is missing or not an `http...` link, it stops immediately and returns `False`.
+
+3) __Prepares the image (optional)__
+- If an image path was provided and exists, it creates a __temporary variant__ of the image (tiny harmless changes) to avoid uploading the exact same binary every time.
+- If the image path is invalid/missing, it continues without an image.
+
+4) __Prepares the text__
+- It creates a __slightly varied__ version of the message text (small spacing/punctuation variations) so posts are not byte-identical every time.
+
+5) __Loads session cookies (if available)__
+- It tries to reuse cookies for that Facebook user from cache / JSON.
+- This helps avoid repeated logins.
+
+6) __Starts the browser__
+- It launches Chromium using Playwright with “stealth-ish” flags (reduce automation fingerprints).
+- If Xvfb is available, it can run with a virtual display (often more stable than pure headless).
+
+7) __Creates a browser context with Cuba time__
+- It sets locale and __timezone__ (America/Havana) in the browser context so the session behaves in Cuba time.
+
+8) __Injects anti-detection script__
+- It disables obvious automation markers like `navigator.webdriver` and sets a few “chrome-like” fields.
+
+9) __Restores cookies into the session__
+- If cookies exist and are valid, it loads them into the context.
+
+10) __Opens Facebook and ensures the user is logged in__
+- It goes to the Facebook login page.
+- If it detects the session is already logged in, it continues.
+- If not logged in, it fills email/password, clicks login, and if successful it __saves cookies__ for future runs.
+
+11) __Navigates to the target Facebook group__
+- It loads the group URL and waits for the page to settle.
+- It takes an early screenshot for debugging.
+
+12) __Performs light “human browsing” behavior__
+- It scrolls, pauses, and performs a few safe interactions (the intent is to avoid a “teleport → post → leave” bot pattern).
+
+13) __Opens the post composer__
+- It tries multiple selectors (e.g., “¿Qué estás pensando?” / “Escribe algo”).
+- If those fail, it tries a keyboard shortcut fallback.
+- It takes a screenshot once the composer is open.
+
+14) __Inserts the message text__
+- It locates the `contenteditable` area inside the composer dialog.
+- It types the message using a “human typing” method with realistic delays (and optionally minor mistakes).
+- It verifies the text is present and takes a screenshot.
+
+15) __Uploads the image (if provided)__      
+- It clicks the “Photo/Video” UI and finds the file input inside the dialog.
+- It uploads the temporary image file.
+- It waits for the upload to settle and takes a screenshot.
+
+15) __Clicks “Publish”__
+- It waits a bit (human hesitation), then clicks the Publish button.
+- If the primary selector fails, it tries a fallback selector.
+
+17) __Waits briefly for Facebook to process the post__
+- It pauses a few seconds so Facebook can accept the post and update UI.
+
+18) __Verifies the result using “Tu contenido”__
+- Instead of trusting “toast” messages or assumptions, it navigates to the group’s “__Tu contenido__” pages:
+- checks __Pending__ page (Pendiente).
+- checks __Posted__ page (Publicado).
+- Based on what it finds, it sets `estado_detectado` to:
+- `PUBLICADO`, or.
+- `PENDIENTE`, or.
+- `DESCONOCIDO` (couldn’t confirm either way).
+
+19) __Captures a final screenshot__
+- It saves `paso5_best_<ESTADO>` for evidence of what it detected
+
+20) __Logs activity and returns__
+- It records activity in the anti-suspension tracker.
+- It returns a final boolean ok and logs the detected state.
+
+21) __Cleans up__
+- Closes Playwright context and browser.
+- Deletes the temporary image file (if created).
+- Stops Xvfb (if started).
+
+
 # Walkthrough with functions and responsibilities
 This section explains what happens, where, and why, using the real structure of the code.
 
@@ -23,9 +112,7 @@ Decide final ok / estado_detectado
 
 
 ### 2️⃣ Input validation
-Inside iniciar_publicacion_en_grupo:      
-
-if not grupo_url or not grupo_url.startswith('http'):       
+Inside iniciar_publicacion_en_gif not grupo_url or not grupo_url.startswith('http'):       
 
     return False
 
